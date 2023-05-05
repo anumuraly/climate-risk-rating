@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { useTable, useSortBy } from 'react-table';
+import { useTable, useSortBy, Column, HeaderGroup, TableCommonProps, TableOptions } from 'react-table';
 import { DataItem } from '@/data';
 
 type Props = {
@@ -11,7 +11,8 @@ type Props = {
 
 const DataTable: React.FC<Props> = ({ data, selectedYear }) => {
   const [searchInput, setSearchInput] = useState('');
-  const columns = useMemo(
+
+  const columns: readonly Column<DataItem>[] = useMemo(
     () => [
       {
         Header: 'Asset Name',
@@ -67,13 +68,15 @@ const DataTable: React.FC<Props> = ({ data, selectedYear }) => {
     return result;
   }, [filteredData, searchInput]);
 
-  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable(
+  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable<DataItem>(
     {
       columns,
       data: tableData,
     },
     useSortBy
   );
+
+  const headerGroupsTyped = headerGroups as Array<HeaderGroup<DataItem>>;
 
   return (
     <div>
@@ -86,10 +89,10 @@ const DataTable: React.FC<Props> = ({ data, selectedYear }) => {
         className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500'
       />
       <table {...getTableProps()} >
-        <thead>
-          {headerGroups.map((headerGroup, i) => (
-            <tr {...headerGroup.getHeaderGroupProps()} key={i}>
-              {headerGroup.headers.map((column, j) => (
+      <thead>
+        {headerGroupsTyped.map((headerGroup, i) => (
+          <tr {...headerGroup.getHeaderGroupProps()} key={i}>
+            {headerGroup.headers.map((column: any, j: number) => (
               <th
                 {...column.getHeaderProps(column.getSortByToggleProps())}
                 key={j}
@@ -99,10 +102,10 @@ const DataTable: React.FC<Props> = ({ data, selectedYear }) => {
                   {column.isSorted ? (column.isSortedDesc ? ' 🔽' : ' 🔼') : ''}
                 </span>
               </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
+            ))}
+          </tr>
+        ))}
+      </thead>
         <tbody {...getTableBodyProps()}>
           {rows.map((row, i) => {
             prepareRow(row);
