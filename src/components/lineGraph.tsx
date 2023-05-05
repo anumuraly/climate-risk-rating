@@ -9,6 +9,11 @@ type Props = {
   businessCategory?: string;
 };
 
+interface ExtendedChartDataSets extends Chart.ChartDataSets {
+  assetNames: string[];
+  riskFactors: string[];
+}
+
 const LineGraph: React.FC<Props> = ({ lat, long, assetName, businessCategory }) => {
   const [data, setData] = useState<DataItem[]>([]);
   const [chart, setChart] = useState<Chart | null>(null);
@@ -43,8 +48,8 @@ const LineGraph: React.FC<Props> = ({ lat, long, assetName, businessCategory }) 
     if (chart) {
       chart.data.labels = labels;
       chart.data.datasets![0].data = riskRatings;
-      chart.data.datasets![0].assetNames = assetNames;
-      chart.data.datasets![0].riskFactors = riskFactors;
+      (chart.data.datasets![0] as ExtendedChartDataSets).assetNames = assetNames;
+      (chart.data.datasets![0] as ExtendedChartDataSets).riskFactors = riskFactors;
       chart.update();
     } else {
       const ctx = canvasRef.current.getContext('2d');
@@ -63,7 +68,7 @@ const LineGraph: React.FC<Props> = ({ lat, long, assetName, businessCategory }) 
                 fill: false,
                 assetNames,
                 riskFactors,
-              },
+              } as ExtendedChartDataSets,
             ],
           },
           options: {
@@ -72,7 +77,6 @@ const LineGraph: React.FC<Props> = ({ lat, long, assetName, businessCategory }) 
             tooltips: {
               mode: 'index',
               intersect: false,
-              multiLine: true,
               callbacks: {
                 title: function (tooltipItem: any, data: any) {
                   const index = tooltipItem[0].index;
