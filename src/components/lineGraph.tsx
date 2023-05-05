@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Chart from 'chart.js';
+import Chart, {ChartDataset} from 'chart.js';
 import { DataItem, loadData } from '@/data';
 
 type Props = {
@@ -9,7 +9,7 @@ type Props = {
   businessCategory?: string;
 };
 
-interface ExtendedChartDataSets extends Chart.ChartDataSets {
+interface ExtendedChartDataSets extends Chart.ChartDataSet<'line'> {
   assetNames: string[];
   riskFactors: string[];
 }
