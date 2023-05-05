@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Chart, {ChartDataset} from 'chart.js';
+import { Chart, ChartDataset, TooltipItem, TooltipModel, ChartData } from 'chart.js/auto';
 import { DataItem, loadData } from '@/data';
 
 type Props = {
@@ -9,7 +9,7 @@ type Props = {
   businessCategory?: string;
 };
 
-interface ExtendedChartDataSets extends Chart.ChartDataSet<'line'> {
+interface ExtendedChartDataSets extends ChartDataset<'line'> {
   assetNames: string[];
   riskFactors: string[];
 }
@@ -44,7 +44,7 @@ const LineGraph: React.FC<Props> = ({ lat, long, assetName, businessCategory }) 
     const riskRatings = sortedData.map((item) => parseFloat(item['Risk Rating']));
     const riskFactors = sortedData.map((item) => item['Risk Factors']);
     const assetNames = sortedData.map((item) => item['Asset Name']);
-    
+
     if (chart) {
       chart.data.labels = labels;
       chart.data.datasets![0].data = riskRatings;
@@ -74,22 +74,17 @@ const LineGraph: React.FC<Props> = ({ lat, long, assetName, businessCategory }) 
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            tooltips: {
-              mode: 'index',
-              intersect: false,
-              callbacks: {
-                title: function (tooltipItem: any, data: any) {
-                  const index = tooltipItem[0].index;
-                  return `Year: ${data.labels[index]}`;
-                },
-                label: function (tooltipItem: any, data: any) {
-                  const dataset = data.datasets[tooltipItem.datasetIndex];
-                  const index = tooltipItem.index;
-                  return [
-                    `Asset Name: ${dataset.assetNames[index]}`,
-                    `Risk Rating: ${tooltipItem.yLabel}`,
-                    `Risk Factors: ${dataset.riskFactors[index]}`,
-                  ];
+            plugins: {
+              tooltip: {
+                mode: 'index',
+                intersect: false,
+                callbacks: {
+                  title: function (tooltipItems: (TooltipItem<'line'> & { index?: number })[], data?: ChartData<'line'>) {
+                    if (data && data.labels && tooltipItems[0].index !== undefined) {
+                      const index = tooltipItems[0].index;
+                      return `Year: ${data.labels[index]}`;
+                    }
+                  },
                 },
               },
             },
@@ -103,3 +98,4 @@ const LineGraph: React.FC<Props> = ({ lat, long, assetName, businessCategory }) 
 };
 
 export default LineGraph;
+
